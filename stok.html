@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Stok Bahan Ajar - SITTA</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app" class="container">
+        <a href="index.html" class="btn" style="background:#7f8c8d; margin-bottom: 15px;">← Kembali</a>
+        <h2>Daftar Stok Bahan Ajar</h2>
+
+        <div class="panel">
+            <h3>Filter & Urutkan Data</h3>
+            <div class="flex-row">
+                <div class="form-group">
+                    <label>UT Daerah</label>
+                    <select v-model="filterUpbjj">
+                        <option value="">Semua Daerah</option>
+                        <option v-for="u in upbjjList" :value="u">{{ u }}</option>
+                    </select>
+                </div>
+                <div class="form-group" v-if="filterUpbjj">
+                    <label>Kategori MK</label>
+                    <select v-model="filterKategori">
+                        <option value="">Semua Kategori</option>
+                        <option v-for="k in kategoriList" :value="k">{{ k }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Urutkan Berdasarkan</label>
+                    <select v-model="sortBy">
+                        <option value="judul">Judul (A-Z)</option>
+                        <option value="stok">Stok Terkecil</option>
+                        <option value="harga">Harga Termurah</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" v-model="filterRestock"> Hanya yang butuh Re-stock (Menipis/Kosong)
+                </label>
+            </div>
+            <button class="btn" @click="resetFilter" style="margin-top:10px; background:#e74c3c;">Reset Filter</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode / Judul</th>
+                    <th>Kategori</th>
+                    <th>UT Daerah</th>
+                    <th>Lokasi</th>
+                    <th>Stok / Safety</th>
+                    <th>Harga</th>
+                    <th>Status</th>
+                    <th>Catatan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in filteredStok" :key="item.kode">
+                    <td><strong>{{ item.kode }}</strong><br>{{ item.judul }}</td>
+                    <td>{{ item.kategori }}</td>
+                    <td>{{ item.upbjj }}</td>
+                    <td>{{ item.lokasiRak }}</td>
+                    <td>{{ item.qty }} / {{ item.safety }}</td>
+                    <td>Rp {{ item.harga }}</td>
+                    <td>
+                        <span v-if="item.qty === 0" class="status-kosong">Kosong</span>
+                        <span v-else-if="item.qty <= item.safety" class="status-menipis">Menipis</span>
+                        <span v-else class="status-aman">Aman</span>
+                    </td>
+                    <td v-html="item.catatanHTML"></td>
+                    <td><button class="btn btn-edit" @click="editData(item)">Edit</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="panel" style="margin-top: 30px;">
+            <h3>{{ isEdit ? 'Edit Bahan Ajar' : 'Tambah Bahan Ajar Baru' }}</h3>
+            <form @submit.prevent="simpanData">
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Kode MK</label>
+                        <input type="text" v-model="form.kode" :disabled="isEdit" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Judul MK</label>
+                        <input type="text" v-model="form.judul" required>
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select v-model="form.kategori" required>
+                            <option v-for="k in kategoriList" :value="k">{{ k }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>UT Daerah</label>
+                        <select v-model="form.upbjj" required>
+                            <option v-for="u in upbjjList" :value="u">{{ u }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi Rak</label>
+                        <input type="text" v-model="form.lokasiRak" required>
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Jumlah Stok</label>
+                        <input type="number" v-model.number="form.qty" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Safety Stok</label>
+                        <input type="number" v-model.number="form.safety" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga (Rp)</label>
+                        <input type="number" v-model.number="form.harga" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Catatan (HTML)</label>
+                    <input type="text" v-model="form.catatanHTML">
+                </div>
+                <button type="submit" class="btn">Simpan Data</button>
+                <button type="button" class="btn" style="background:#e74c3c;" v-if="isEdit" @click="resetForm">Batal</button>
+            </form>
+        </div>
+    </div>
+    <script src="js/stok-app.js"></script>
+</body>
+</html>
